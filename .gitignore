@@ -1,0 +1,25 @@
+# 1. 운영체제 생성 파일 (OS generated files)
+.DS_Store
+
+# 2. 의존성 (Dependencies)
+/node_modules
+
+# 3. 빌드 결과물 (Build output)
+/dist
+/electron-builder-cache
+
+# 4. electron-builder가 생성하는 패키징된 애플리케이션 파일
+# (macOS, Windows, Linux 용 설치 파일)
+*.dmg
+*.zip
+
+# 4. 환경 변수 파일 (Environment variables)
+.env
+.env.local
+
+# 5. 로그 파일 (Log files)
+npm-debug.log*
+
+# 6. 기타
+.vscode
+.idea
