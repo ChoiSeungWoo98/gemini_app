@@ -10,10 +10,10 @@ const createWindow = () => {
   });
 
   // 로컬 파일이 아닌, Gemini 웹사이트의 URL을 창에 로드합니다.
-  win.loadURL('https://accounts.google.com/v3/signin/identifier?continue=https%3A%2F%2Fgemini.google.com%2F&ec=GAZAkgU&followup=https%3A%2F%2Fgemini.google.com%2F&ifkv=AdBytiM0LG0n0xewTF4fTxPm6qoNpY_XR5LM7g4vx_-GvP-bLgWpY9n14IcOoQc8uzMom64fcUgE&passive=1209600&flowName=GlifWebSignIn&flowEntry=ServiceLogin&dsh=S-1741546913%3A1751116639004515');
+  win.loadURL('https://gemini.google.com');
 };
 
-// Electron 앱이 모든 준비를 마쳤을 때 이 함수가 호출됩니다.
+// Electron 앱이 모든 준비를 마쳤을 때 이 함수가 호출됩니다.ßß
 app.whenReady().then(() => {
   createWindow(); // 메인 창을 생성합니다.
 
@@ -31,4 +31,4 @@ app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
   }
-});
+});ßß
