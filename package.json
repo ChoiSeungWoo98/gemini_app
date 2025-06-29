@@ -19,7 +19,8 @@
     "productName": "My Gemini App",
     "mac": {
       "category": "public.app-category.productivity",
-      "target": "dmg"
+      "target": "dmg",
+      "icon": "build/icon.icns"
     }
   }
 }
