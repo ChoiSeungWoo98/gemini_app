@@ -1,9 +1,9 @@
 name: Update Homebrew Tap
 
-# 이 워크플로우는 gemini_app 저장소에 'Release'가 발행(published)되었을 때 실행됩니다.
+# "new-release-created" 라는 이름의 신호(dispatch)를 받았을 때만 실행됩니다.
 on:
-  release:
-    types: [published]
+  repository_dispatch:
+    types: [new-release-created]
 
 jobs:
   update-tap:

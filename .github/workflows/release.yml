@@ -48,6 +48,12 @@ jobs:
         with:
           # dist/ 폴더 아래에 있는 모든 .dmg 파일을 찾아 첨부합니다.
           files: dist/*.dmg
-          # 기본 GITHUB_TOKEN 대신, 직접 만든 PAT를 사용하도록 변경합니다.
-          # 이렇게 해야 이 릴리즈 이벤트가 다른 워크플로우를 트리거할 수 있습니다.
+
+      # 빌드/릴리즈가 끝난 후, 다른 워크플로우를 깨우는 '신호'를 보냅니다.
+      - name: Dispatch Tap Update Workflow
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          # 신호를 보낼 때 사용자님의 권한(PAT)이 반드시 필요합니다.
           token: ${{ secrets.TAP_REPO_TOKEN }}
+          # 이 신호의 이름입니다.
+          event-type: new-release-created
