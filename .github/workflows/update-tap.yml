@@ -16,21 +16,19 @@ jobs:
           repository: ChoiSeungWoo98/homebrew-gemini-app
           token: ${{ secrets.TAP_REPO_TOKEN }}
 
-      # 2. release.yml이 보낸 정보들을 환경 변수로 저장합니다.
-      - name: Set release variables
-        run: |
-          echo "VERSION=${{ github.event.client_payload.version.substring(1) }}" >> $GITHUB_ENV
-          echo "DOWNLOAD_URL=${{ github.event.client_payload.download_url }}" >> $GITHUB_ENV
-
-      # 3. curl을 사용해 .dmg 파일을 다운로드합니다.
+      # 2. curl을 사용해 .dmg 파일을 다운로드합니다.
+      # client-payload에서 직접 다운로드 URL을 가져옵니다.
       - name: Download release asset
-        run: curl -L -o asset.dmg "${{ env.DOWNLOAD_URL }}"
+        run: curl -L -o asset.dmg "${{ github.event.client_payload.download_url }}"
       
-      # 4. shasum을 사용해 다운로드한 파일의 SHA256 값을 계산합니다.
-      - name: Calculate SHA256
-        run: echo "SHA256=$(shasum -a 256 asset.dmg | awk '{print $1}')" >> $GITHUB_ENV
+      # 3. shasum을 사용해 다운로드한 파일의 SHA256 값을 계산하고,
+      #    태그 이름에서 'v'를 제거한 버전 번호를 환경 변수로 저장합니다.
+      - name: Prepare update variables
+        run: |
+          echo "SHA256=$(shasum -a 256 asset.dmg | awk '{print $1}')" >> $GITHUB_ENV
+          echo "VERSION=$(echo "${{ github.event.client_payload.version }}" | sed 's/^v//')" >> $GITHUB_ENV
 
-      # 5. sed를 사용해 Cask 파일의 version과 sha256 값을 교체합니다.
+      # 4. sed를 사용해 Cask 파일의 version과 sha256 값을 교체합니다.
       - name: Update Cask file
         run: |
           CASK_FILE="Casks/my-gemini-app.rb"
@@ -38,7 +36,7 @@ jobs:
           sed -i.bak "s/sha256 \".*\"/sha256 \"${{ env.SHA256 }}\"/" "$CASK_FILE"
           rm "${CASK_FILE}.bak"
 
-      # 6. 변경된 Cask 파일을 커밋하고 푸시합니다.
+      # 5. 변경된 Cask 파일을 커밋하고 푸시합니다.
       - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
