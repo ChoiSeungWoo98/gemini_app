@@ -9,26 +9,40 @@ jobs:
   update-tap:
     runs-on: ubuntu-latest
     steps:
-      # 1. 다른 저장소(homebrew-gemini-app)에 접근하기 위해 PAT를 사용해 체크아웃합니다.
+      # 1. homebrew-gemini-app 저장소를 체크아웃합니다.
       - name: Check out homebrew-gemini-app
         uses: actions/checkout@v4
         with:
           repository: ChoiSeungWoo98/homebrew-gemini-app
           token: ${{ secrets.TAP_REPO_TOKEN }}
 
-      # 2. 커밋을 할 Git 사용자 정보를 설정합니다. (안정성을 위해 추가)
-      - name: Set up Git user
+      # 2. release.yml이 보낸 정보들을 환경 변수로 저장합니다.
+      - name: Set release variables
+        run: |
+          echo "VERSION=${{ github.event.client_payload.version.substring(1) }}" >> $GITHUB_ENV
+          echo "DOWNLOAD_URL=${{ github.event.client_payload.download_url }}" >> $GITHUB_ENV
+
+      # 3. curl을 사용해 .dmg 파일을 다운로드합니다.
+      - name: Download release asset
+        run: curl -L -o asset.dmg "${{ env.DOWNLOAD_URL }}"
+      
+      # 4. shasum을 사용해 다운로드한 파일의 SHA256 값을 계산합니다.
+      - name: Calculate SHA256
+        run: echo "SHA256=$(shasum -a 256 asset.dmg | awk '{print $1}')" >> $GITHUB_ENV
+
+      # 5. sed를 사용해 Cask 파일의 version과 sha256 값을 교체합니다.
+      - name: Update Cask file
+        run: |
+          CASK_FILE="Casks/my-gemini-app.rb"
+          sed -i.bak "s/version \".*\"/version \"${{ env.VERSION }}\"/" "$CASK_FILE"
+          sed -i.bak "s/sha256 \".*\"/sha256 \"${{ env.SHA256 }}\"/" "$CASK_FILE"
+          rm "${CASK_FILE}.bak"
+
+      # 6. 변경된 Cask 파일을 커밋하고 푸시합니다.
+      - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
-
-      # 3. Homebrew Cask 파일을 자동으로 업데이트합니다.
-      - name: Update Homebrew tap
-        uses: p-actions/update-homebrew-tap@v1
-        with:
-          # 업데이트할 Cask 파일의 경로
-          formula: Casks/my-gemini-app.rb
-          # 앱 저장소 주소 (릴리즈 정보를 가져올 곳)
-          repository: ChoiSeungWoo98/gemini_app
-          # 커밋 메시지
-          commit_message: "feat: Update my-gemini-app to {{version}}"
+          git add Casks/my-gemini-app.rb
+          git commit -m "Update my-gemini-app to v${{ env.VERSION }}"
+          git push

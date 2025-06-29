@@ -57,3 +57,9 @@ jobs:
           token: ${{ secrets.TAP_REPO_TOKEN }}
           # 이 신호의 이름입니다.
           event-type: new-release-created
+          # 신호를 보낼 때, 필요한 정보들을 'client-payload'에 담아서 보냅니다.
+          client-payload: >-
+            {
+              "version": "${{ github.ref_name }}",
+              "download_url": "${{ fromJson(steps.create_release.outputs.assets)[0].browser_download_url }}"
+            }
