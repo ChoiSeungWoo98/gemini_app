@@ -118,8 +118,15 @@ jobs:
 
 ~
 
-# 레포에 업로드
 # 태그 생성
-git tag v1.0.0
-git push <remote-name> v1.0.0
+# git tag v1.0.0
+# git push <remote-name> v1.0.0
+# npm version v1.0.0
+npm version <version-number>
+# 손쉬운 버전 관리 명령어
+# npm version patch : 패치 버전 올리기 1.0.1
+# npm version minor : 마이너 버전 올리기 1.1.0
+# npm version major : 메이저 버전 올리기 2.0.0
+git push && git push --tags
+
 ```
