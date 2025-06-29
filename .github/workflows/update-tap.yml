@@ -1,6 +1,6 @@
 name: Update Homebrew Tap
 
-# "new-release-created" 라는 이름의 신호(dispatch)를 받았을 때만 실행됩니다.
+# "new-release-created" 라는 신호를 받았을 때 실행됩니다.
 on:
   repository_dispatch:
     types: [new-release-created]
@@ -9,38 +9,42 @@ jobs:
   update-tap:
     runs-on: ubuntu-latest
     steps:
-      # 1. homebrew-gemini-app 저장소를 체크아웃합니다.
+      # 1. Tap 저장소를 체크아웃합니다.
       - name: Check out homebrew-gemini-app
         uses: actions/checkout@v4
         with:
           repository: ChoiSeungWoo98/homebrew-gemini-app
           token: ${{ secrets.TAP_REPO_TOKEN }}
 
-      # 2. curl을 사용해 .dmg 파일을 다운로드합니다.
-      # client-payload에서 직접 다운로드 URL을 가져옵니다.
-      - name: Download release asset
-        run: curl -L -o asset.dmg "${{ github.event.client_payload.download_url }}"
-      
-      # 3. shasum을 사용해 다운로드한 파일의 SHA256 값을 계산하고,
-      #    태그 이름에서 'v'를 제거한 버전 번호를 환경 변수로 저장합니다.
+      # 2. release.yml이 보낸 정보들을 환경 변수로 저장합니다.
       - name: Prepare update variables
         run: |
-          echo "SHA256=$(shasum -a 256 asset.dmg | awk '{print $1}')" >> $GITHUB_ENV
-          echo "VERSION=$(echo "${{ github.event.client_payload.version }}" | sed 's/^v//')" >> $GITHUB_ENV
+          echo "NEW_VERSION=$(echo "${{ github.event.client_payload.version }}" | sed 's/^v//')" >> $GITHUB_ENV
+          echo "DOWNLOAD_URL=${{ github.event.client_payload.download_url }}" >> $GITHUB_ENV
 
-      # 4. sed를 사용해 Cask 파일의 version과 sha256 값을 교체합니다.
+      # 3. .dmg 파일을 다운로드합니다.
+      - name: Download release asset
+        run: curl -L -o asset.dmg "${{ env.DOWNLOAD_URL }}"
+      
+      # 4. 다운로드한 파일의 SHA256 값을 계산합니다.
+      - name: Calculate SHA256
+        run: echo "NEW_SHA256=$(shasum -a 256 asset.dmg | awk '{print $1}')" >> $GITHUB_ENV
+
+      # 5. Cask 파일의 url, version, sha256 값을 모두 교체합니다.
       - name: Update Cask file
         run: |
           CASK_FILE="Casks/my-gemini-app.rb"
-          sed -i.bak "s/version \".*\"/version \"${{ env.VERSION }}\"/" "$CASK_FILE"
-          sed -i.bak "s/sha256 \".*\"/sha256 \"${{ env.SHA256 }}\"/" "$CASK_FILE"
+          # URL에 포함된 슬래시(/)와 충돌하지 않도록 sed의 구분자로 |를 사용합니다.
+          sed -i.bak "s|url \".*\"|url \"${{ env.DOWNLOAD_URL }}\"|" "$CASK_FILE"
+          sed -i.bak "s/version \".*\"/version \"${{ env.NEW_VERSION }}\"/" "$CASK_FILE"
+          sed -i.bak "s/sha256 \".*\"/sha256 \"${{ env.NEW_SHA256 }}\"/" "$CASK_FILE"
           rm "${CASK_FILE}.bak"
 
-      # 5. 변경된 Cask 파일을 커밋하고 푸시합니다.
+      # 6. 변경된 파일을 커밋하고 푸시합니다.
       - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add Casks/my-gemini-app.rb
-          git commit -m "Update my-gemini-app to v${{ env.VERSION }}"
+          git commit -m "Update my-gemini-app to v${{ env.NEW_VERSION }}"
           git push
