@@ -28,10 +28,10 @@ jobs:
         with:
           node-version: '20' # 프로젝트에 맞는 Node.js 버전을 사용하세요.
 
-      # 3. 의존성 설치
-      # package-lock.json을 기반으로 모든 패키지를 정확하고 빠르게 설치합니다.
+      # 3. 의존성 설치 (수정된 부분)
+      # package.json을 기반으로 의존성을 설치합니다.
       - name: Install dependencies
-        run: npm ci
+        run: npm install
 
       # 4. 앱 빌드 실행
       # package.json에 정의된 build 스크립트를 실행하여 .dmg 파일을 생성합니다.
