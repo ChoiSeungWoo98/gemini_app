@@ -3,7 +3,7 @@ name: Update Homebrew Tap
 # "new-release-created" 라는 신호를 받았을 때 실행
 on:
   repository_dispatch:
-    types: [${{ vars.EVENT_TYPE_NAME }}]
+    types: [new-release-created]
 
 jobs:
   update-tap:

@@ -129,4 +129,9 @@ npm version <version-number>
 # npm version major : 메이저 버전 올리기 2.0.0
 git push && git push --tags
 
+결론(예시)
+git add
+git commit
+npm version patch
+git push && git push --tags
 ```

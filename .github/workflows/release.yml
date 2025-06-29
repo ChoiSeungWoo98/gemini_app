@@ -49,7 +49,7 @@ jobs:
         with:
           token: ${{ secrets.TAP_REPO_TOKEN }}
           # 보내는 신호 이름
-          event-type: ${{ vars.EVENT_TYPE_NAME }}
+          event-type: new-release-created
           # 신호를 보낼 때, 필요한 정보를 담아서 보내도록 설정
           client-payload: >-
             {
