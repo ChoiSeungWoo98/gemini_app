@@ -18,6 +18,7 @@
   "build": {
     "appId": "com.choiseu.gemini-app",
     "productName": "My Gemini App",
+    "publish": "never",
     "mac": {
       "category": "public.app-category.productivity",
       "target": "dmg"
