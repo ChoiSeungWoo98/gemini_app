@@ -1,0 +1,28 @@
+name: Update Homebrew Tap
+
+# 이 워크플로우는 gemini_app 저장소에 'Release'가 발행(published)되었을 때 실행됩니다.
+on:
+  release:
+    types: [published]
+
+jobs:
+  update-tap:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 다른 저장소(homebrew-gemini-app)에 접근하기 위해 PAT를 사용해 체크아웃합니다.
+      - name: Check out a different repo
+        uses: actions/checkout@v4
+        with:
+          repository: ChoiSeungWoo98/homebrew-gemini-app
+          token: ${{ secrets.TAP_REPO_TOKEN }}
+
+      # 2. Homebrew Cask 파일을 업데이트해주는 전문 액션을 사용합니다.
+      - name: Update Homebrew tap
+        uses: p-actions/update-homebrew-tap@v1
+        with:
+          # 업데이트할 Cask 파일의 경로
+          formula: Casks/my-gemini-app.rb
+          # 앱 저장소 주소 (릴리즈 정보를 가져올 곳)
+          repository: ChoiSeungWoo98/gemini_app
+          # 커밋 메시지
+          commit_message: "Update to {{version}}"
