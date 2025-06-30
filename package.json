@@ -12,15 +12,24 @@
   "main": "main.js",
   "scripts": {
     "start": "electron .",
-    "build": "electron-builder --publish never"
+    "build": "electron-builder --publish never -mw"
   },
   "build": {
     "appId": "com.choiseu.gemini-app",
     "productName": "Gemini",
+    "files": [
+      "main.js",
+      "package.json",
+      "build/"
+    ],
     "mac": {
       "category": "public.app-category.productivity",
       "target": "dmg",
       "icon": "build/gemini.icns"
+    },
+    "win": {
+      "target": "nsis",
+      "icon": "build/gemini.ico"
     }
   },
   "devDependencies": {

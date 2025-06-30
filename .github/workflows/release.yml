@@ -11,10 +11,14 @@ jobs:
   # jobs 이름
   build-and-release:
     # 가상환경 지정
-    runs-on: macos-latest
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
     # 권한 설정 부분
     permissions:
       contents: write
+      packages: write 
 
     steps:
       # 1. 소스 코드 가져오기
@@ -34,17 +38,19 @@ jobs:
 
       # 3. 앱 빌드
       - name: Build the app
-        run: npm run build
+        run: npm run build -- -${{ matrix.os == 'macos-latest' && 'm' || 'w' }}
 
       # 4. 릴리즈 생성 및 업로드 (ID 부여)
-      - name: Create Release and Upload Asset
-        id: create_release
+      - name: Upload assets to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          files: dist/*.dmg
+          files: |
+            dist/*.dmg
+            dist/*.exe
 
-      # 5. Tap 업데이트 워크플로우에 신호 보내기
-      - name: Dispatch Tap Update Workflow
+      # 5. brew Tap 업데이트 워크플로우에 신호 보내기
+      - name: Dispatch Homebrew Tap Update
+        if: matrix.os == 'macos-latest' # 이 단계는 macOS 빌드에서만 실행됩니다.
         uses: peter-evans/repository-dispatch@v3
         with:
           token: ${{ secrets.TAP_REPO_TOKEN }}
