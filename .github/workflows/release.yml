@@ -67,6 +67,14 @@ jobs:
           # dist 폴더 아래의 모든 .dmg와 .exe 파일을 업로드 대상으로 지정합니다.
           files: dist/*
 
+      # --- [개선된 부분] ---
+      # 릴리즈된 여러 파일 중에서 .dmg 파일의 다운로드 URL만 정확히 추출합니다.
+      - name: Get DMG Download URL
+        id: get_dmg_url
+        run: |
+          URL=$(echo '${{ steps.create_release.outputs.assets }}' | jq -r '.[] | select(.name | endswith(".dmg")) | .browser_download_url')
+          echo "dmg_url=${URL}" >> $GITHUB_OUTPUT
+
       # Homebrew Tap 업데이트 신호를 보냅니다.
       - name: Dispatch Homebrew Tap Update
         uses: peter-evans/repository-dispatch@v3
@@ -76,5 +84,5 @@ jobs:
           client-payload: >-
             {
               "version": "${{ github.ref_name }}",
-              "download_url": "${{ fromJson(steps.create_release.outputs.assets) | fromjson | where('name', 'endswith', '.dmg') | first | tojson | fromjson | .browser_download_url }}"
+              "download_url": "${{ steps.get_dmg_url.outputs.dmg_url }}"
             }
