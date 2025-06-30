@@ -64,10 +64,11 @@ jobs:
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
-          # dist 폴더 아래의 모든 .dmg와 .exe 파일을 업로드 대상으로 지정합니다.
-          files: dist/*
+          # .dmg와 .exe 설치 파일만 업로드 대상으로 지정합니다.
+          files: |
+            dist/*.dmg
+            dist/*.exe
 
-      # --- [개선된 부분] ---
       # 릴리즈된 여러 파일 중에서 .dmg 파일의 다운로드 URL만 정확히 추출합니다.
       - name: Get DMG Download URL
         id: get_dmg_url
